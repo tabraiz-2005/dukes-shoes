@@ -8,7 +8,7 @@ test("shopping flow, variant limits, subtotal and persistence", async ({
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/");
-  await page.getByRole("link", { name: "Shop the collection" }).click();
+  await page.getByRole("link", { name: "The collection", exact: true }).click();
   await page
     .getByRole("navigation", { name: "Categories" })
     .last()
@@ -209,3 +209,29 @@ for (const width of [390, 768, 1440])
       ).toBeFocused();
     }
   });
+
+test("black/white theme switch persists", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.getByRole("button", { name: "Switch to white theme" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await expect
+    .poll(() => page.evaluate(() => getComputedStyle(document.body).backgroundColor))
+    .toBe("rgb(255, 255, 255)");
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await page.getByRole("button", { name: "Switch to black theme" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+});
+
+test("sale page and struck-through prices", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "Sale" }).click();
+  await expect(page).toHaveURL(/sale=1/);
+  await expect(page.getByRole("heading", { name: "Sale" })).toBeVisible();
+  await expect(page.locator(".product-card")).toHaveCount(4);
+  await expect(page.locator(".product-card .price-was").first()).toBeVisible();
+  await page.goto("/products/clifton");
+  await expect(page.locator(".detail-price .price-was")).toContainText("18,500");
+  await expect(page.locator(".detail-price .price-now")).toContainText("14,500");
+});

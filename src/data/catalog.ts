@@ -94,6 +94,8 @@ type Def = {
   detailFirst?: boolean;
   colors: string[];
   price: number;
+  /** Original price in whole PKR when the piece is on sale. */
+  was?: number;
   /** Extra price for a specific colour, in whole PKR. */
   premium?: Record<string, number>;
   sizes: keyof typeof SIZES;
@@ -219,6 +221,7 @@ const defs: Def[] = [
   {
     name: "Clifton",
     style: "Leather slide",
+    was: 18500,
     category: "sandals",
     subcategory: "slides",
     art: "sandal-slide",
@@ -316,6 +319,7 @@ const defs: Def[] = [
   {
     name: "Norozi",
     style: "Toe-ring Norozi chappal",
+    was: 16500,
     category: "chappal",
     subcategory: "norozi",
     art: "chappal-norozi",
@@ -348,6 +352,7 @@ const defs: Def[] = [
   {
     name: "Heritage Belt, 35mm",
     style: "Casual belt with brass buckle",
+    was: 15500,
     category: "belts",
     subcategory: "casual-belts",
     art: "belt-brass",
@@ -412,6 +417,7 @@ const defs: Def[] = [
   {
     name: "Card Holder",
     style: "Three-slot card holder",
+    was: 8500,
     category: "wallets",
     subcategory: "card-holders",
     art: "wallet-card",
@@ -509,6 +515,10 @@ export const products: Product[] = defs.map((d, i) => {
           price:
             (d.price + (d.premium?.[color] ?? 0)) *
             10 ** store.currency.minorUnitDigits,
+          compareAtPrice: d.was
+            ? (d.was + (d.premium?.[color] ?? 0)) *
+              10 ** store.currency.minorUnitDigits
+            : null,
         };
       }),
     ),

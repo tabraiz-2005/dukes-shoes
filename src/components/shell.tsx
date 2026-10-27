@@ -8,6 +8,7 @@ import { store } from "@/config/store";
 import { useCatalog } from "./catalog-provider";
 import { useStore } from "./store-provider";
 import { Modal, Photo } from "./ui";
+import { ThemeToggle } from "./theme-toggle";
 
 export function Wordmark({ footer = false }: { footer?: boolean }) {
   if (store.logo)
@@ -46,6 +47,7 @@ export function Header() {
     [search, setSearch] = useState(false);
   const { getCategories, getProducts } = useCatalog();
   const categories = getCategories();
+  const hasSale = getProducts({ sale: "1" }).length > 0;
   return (
     <>
       <a className="skip" href="#main">
@@ -63,79 +65,91 @@ export function Header() {
           >
             <Menu size={22} strokeWidth={1.4} />
           </button>
-          <nav className="primary-nav" aria-label="Main navigation">
-            <ul
-              key={path}
-              onClick={(e) => {
-                if ((e.target as HTMLElement).closest("a"))
-                  (document.activeElement as HTMLElement | null)?.blur();
-              }}
-            >
-              {categories.map((c) => (
-                <li key={c.id}>
-                  <Link href={`/shop?category=${c.slug}`}>{c.name}</Link>
-                  <div className="mega">
-                    <div className="mega-inner">
-                      <div className="mega-links">
-                        <Link href={`/shop?category=${c.slug}`}>
-                          All {c.name.toLowerCase()}
-                        </Link>
-                        {c.subcategories.map((sub) => (
-                          <Link
-                            key={sub.slug}
-                            href={`/shop?category=${c.slug}&type=${sub.slug}`}
-                          >
-                            {sub.name}
-                          </Link>
-                        ))}
-                      </div>
-                      <p className="mega-copy">{c.description}</p>
-                      <Link
-                        className="mega-feature"
-                        href={`/shop?category=${c.slug}`}
-                        tabIndex={-1}
-                        aria-hidden="true"
-                      >
-                        <span className="mega-photo">
-                          <Photo src={c.image} alt="" sizes="260px" />
-                        </span>
-                        <span>
-                          {getProducts({ category: c.id }).length} pieces
-                        </span>
-                      </Link>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <Link className="wordmark" href="/" aria-label={`${store.name} home`}>
+            <Wordmark />
+          </Link>
         </div>
-        <Link className="wordmark" href="/" aria-label={`${store.name} home`}>
-          <Wordmark />
-        </Link>
+        <nav className="primary-nav" aria-label="Main navigation">
+          <ul
+            key={path}
+            onClick={(e) => {
+              if ((e.target as HTMLElement).closest("a"))
+                (document.activeElement as HTMLElement | null)?.blur();
+            }}
+          >
+            {categories.map((c) => (
+              <li key={c.id}>
+                <Link href={`/shop?category=${c.slug}`}>{c.name}</Link>
+                <div className="mega">
+                  <div className="mega-inner">
+                    <div className="mega-links">
+                      <Link href={`/shop?category=${c.slug}`}>
+                        All {c.name.toLowerCase()}
+                      </Link>
+                      {c.subcategories.map((sub) => (
+                        <Link
+                          key={sub.slug}
+                          href={`/shop?category=${c.slug}&type=${sub.slug}`}
+                        >
+                          {sub.name}
+                        </Link>
+                      ))}
+                    </div>
+                    <p className="mega-copy">{c.description}</p>
+                    <Link
+                      className="mega-feature"
+                      href={`/shop?category=${c.slug}`}
+                      tabIndex={-1}
+                      aria-hidden="true"
+                    >
+                      <span className="mega-photo">
+                        <Photo src={c.image} alt="" sizes="220px" />
+                      </span>
+                      <span>
+                        {getProducts({ category: c.id }).length} pieces
+                      </span>
+                    </Link>
+                  </div>
+                </div>
+              </li>
+            ))}
+            {hasSale && (
+              <li>
+                <Link href="/shop?sale=1" className="nav-sale">
+                  Sale
+                </Link>
+              </li>
+            )}
+          </ul>
+        </nav>
         <div className="header-actions">
           <button
-            className="icon-button search-button"
+            className="icon-button search-icon"
             aria-label="Search the collection"
             onClick={() => setSearch(true)}
           >
-            <Search size={20} strokeWidth={1.4} />
-            <span className="action-label">Search</span>
+            <Search size={19} strokeWidth={1.4} />
           </button>
-          <Link className="icon-button" href="/wishlist" aria-label="Wishlist">
-            <Heart size={20} strokeWidth={1.4} />
+          <ThemeToggle />
+          <Link className="icon-button wish-link" href="/wishlist" aria-label="Wishlist">
+            <Heart size={19} strokeWidth={1.4} />
           </Link>
           <Link
-            className="icon-button bag"
+            className="bag-link"
             href="/cart"
             aria-label={`Shopping bag, ${s.hydrated ? s.count : 0} items`}
           >
-            <ShoppingBag size={20} strokeWidth={1.4} />
-            {s.hydrated && s.count > 0 && <span>{s.count}</span>}
+            <ShoppingBag size={19} strokeWidth={1.4} aria-hidden="true" />
+            <span className="bag-label">Bag</span>
+            <span className="bag-count">{s.hydrated ? s.count : 0}</span>
           </Link>
         </div>
       </header>
       <Modal open={menu} onClose={() => setMenu(false)} title="Menu" drawer left>
+        <form action="/shop" className="menu-search" onSubmit={() => setMenu(false)}>
+          <Search size={17} strokeWidth={1.4} aria-hidden="true" />
+          <input name="q" placeholder="Search DUKES" aria-label="Search the collection" autoComplete="off" />
+        </form>
         <nav className="menu-links" aria-label="Mobile categories">
           {categories.map((c) => (
             <details key={c.id}>
@@ -157,6 +171,15 @@ export function Header() {
               ))}
             </details>
           ))}
+          {hasSale && (
+            <Link
+              className="menu-plain menu-sale"
+              href="/shop?sale=1"
+              onClick={() => setMenu(false)}
+            >
+              Sale
+            </Link>
+          )}
           <Link
             className="menu-plain"
             href="/shop?sort=newest"

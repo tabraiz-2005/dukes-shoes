@@ -31,6 +31,7 @@ export function createCatalog(data: CatalogData) {
             .includes(q)) &&
         (!f.category || p.categoryId === f.category) &&
         (!f.type || p.subcategory === f.type) &&
+        (f.sale !== "1" || isOnSale(p)) &&
         p.variants.some(
           (v) =>
             // A size filter only matches sizes that can actually be bought.
@@ -94,6 +95,27 @@ export function createCatalog(data: CatalogData) {
 }
 
 export type Catalog = ReturnType<typeof createCatalog>;
+
+/** True when any variant has an original price above its current price. */
+export function isOnSale(p: Product) {
+  return p.variants.some((v) => (v.compareAtPrice ?? 0) > v.price);
+}
+
+/** Lowest price, the matching original price, and whether prices vary. */
+export function priceInfo(p: Product) {
+  const cheapest = p.variants.reduce((a, b) => (b.price < a.price ? b : a));
+  const varies = p.variants.some((v) => v.price !== cheapest.price);
+  const compare =
+    (cheapest.compareAtPrice ?? 0) > cheapest.price
+      ? cheapest.compareAtPrice!
+      : null;
+  return {
+    price: cheapest.price,
+    compare,
+    varies,
+    percentOff: compare ? Math.round((1 - cheapest.price / compare) * 100) : 0,
+  };
+}
 
 /** Images for a colour, falling back to the product's first colour. */
 export function getImages(p: Product, color?: string): ProductImage[] {

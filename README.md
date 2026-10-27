@@ -27,7 +27,10 @@ Open http://localhost:3000. Needs Node.js 20.9 or newer.
 
 1. Sign in at https://supabase.com and choose **New project**. Pick the region closest to your customers (for Pakistan: Mumbai or Singapore). Save the database password somewhere safe.
 2. Open **SQL Editor → New query**, paste the whole of `supabase/migrations/0001_init.sql`, and select **Run**. This creates the tables, security rules, order functions and the `product-images` photo bucket.
-3. New query again: paste `supabase/seed.sql` and **Run**. This loads the 5 categories and the 20 starting products (edit, replace or archive them later in the admin). Both files are safe to run twice.
+3. New query again: paste `supabase/seed.sql` and **Run**. This loads the 5 categories and the 20 starting products (edit, replace or archive them later in the admin).
+4. New query again: paste `supabase/migrations/0002_sale_prices.sql` and **Run**. This adds sale ("was") prices.
+
+All three files are safe to run twice. Future updates will add more numbered files in `supabase/migrations/`; run each new one once, in order.
 
 ## 3. Connect the site to Supabase
 
@@ -81,13 +84,22 @@ git push -u origin main
 - **Delivery charges**: Admin → Settings. Also update the announcement text in `src/config/store.ts`.
 - **Hide a product**: set it to Draft or Archived. Deleting keeps past orders intact.
 
+## Themes
+
+The store has a **black** theme (default) and a **white** theme. Visitors switch with the sun/moon button next to the bag; the choice is remembered on their device. The admin always uses the black theme.
+
+## Sale prices
+
+In Admin → Products, fill **Was, Rs** for a size (or use **Was price for all**). The store then shows the price in red with the old price struck through and the percentage off, adds a **Sale** tag, and lists the piece on the **Sale** page (`/shop?sale=1`, linked in the menu whenever something is on sale). Clear the field to end the sale.
+
 ## Brand
 
 | Token | Value | Use |
 | --- | --- | --- |
-| Jet black | `#000000` | Background |
+| Jet black | `#000000` | Background (black theme), top bar and footer (both themes) |
+| White | `#ffffff` | Background (white theme) |
 | Gold | `#d4a645`, gradient `#f7dc87` → `#d4a645` → `#a67a22` | Wordmark, buttons, prices, active states |
-| Red | `#c8102e`, velvet `#7d0a16` | Announcement bar, New tags, the making band |
+| Red | `#c8102e` (white theme), `#ff4d5e` (black theme) | Sale prices, Sale tags, Sale link |
 | Ivory | `#f4f2ee` | Text |
 
 Colours are CSS variables at the top of `src/app/globals.css`. Fonts: **Geist** for all text (a clean modern grotesk in the style of cicero.pk) and **Montserrat** for the DUKES wordmark, matching the logo. Both are self-hosted (SIL Open Font License). The lion emblem is `public/brand/lion.png`, cut from a small copy of the logo; replace it with a vector export for sharper results.

@@ -43,6 +43,7 @@ export const productSchema = z
           color_hex: z.string().regex(/^#[0-9a-fA-F]{6}$/),
           stock: z.number().int().min(0).max(100000),
           price: z.number().int().min(0).max(100_000_000),
+          compare_at_price: z.number().int().min(0).max(100_000_000).nullable(),
         }),
       )
       .max(400),
@@ -56,6 +57,8 @@ export const productSchema = z
       const combo = `${v.color_name.toLowerCase()}|${v.size}`;
       if (combos.has(combo))
         ctx.addIssue({ code: "custom", path: ["variants"], message: `${v.color_name} size ${v.size} is listed twice.` });
+      if (v.compare_at_price !== null && v.compare_at_price <= v.price)
+        ctx.addIssue({ code: "custom", path: ["variants"], message: `The "was" price for ${v.color_name} size ${v.size} must be higher than its price, or left empty.` });
       if (skus.has(v.sku))
         ctx.addIssue({ code: "custom", path: ["variants"], message: `SKU ${v.sku} is used twice.` });
       combos.add(combo);

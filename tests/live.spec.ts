@@ -67,8 +67,10 @@ test("admin creates a product that appears in the store", async ({ page }) => {
   await page.getByLabel("Product name").fill("Test Monk Strap");
   await page.getByLabel("Style line").fill("Double monk strap");
   await page.getByLabel("Category").selectOption("dress-shoes");
-  await page.getByLabel("Price for all, Rs").fill("38500");
+  await page.getByLabel("Price for all, Rs", { exact: true }).fill("38500");
   await page.getByRole("button", { name: "Apply" }).first().click();
+  await page.getByLabel("Was price for all, Rs").fill("45000");
+  await page.getByRole("button", { name: "Apply" }).nth(1).click();
   await page.getByLabel("Stock for all").fill("4");
   await page.getByRole("button", { name: "Apply" }).last().click();
   await page.getByText("Live", { exact: true }).click();
@@ -78,7 +80,8 @@ test("admin creates a product that appears in the store", async ({ page }) => {
 
   await page.goto("/products/test-monk-strap");
   await expect(page.getByRole("heading", { name: "Test Monk Strap" })).toBeVisible();
-  await expect(page.locator(".detail-price")).toContainText("38,500");
+  await expect(page.locator(".detail-price .price-now")).toContainText("38,500");
+  await expect(page.locator(".detail-price .price-was")).toContainText("45,000");
 
   // Clean up through the admin.
   await page.goBack();

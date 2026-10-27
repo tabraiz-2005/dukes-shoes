@@ -25,6 +25,8 @@ export type ProductVariant = {
   stock: number;
   /** Integer minor currency units (paisa for PKR). */
   price: number;
+  /** Original price before a sale, in minor units. Shown struck through when set. */
+  compareAtPrice?: number | null;
 };
 
 export type Product = {
@@ -65,6 +67,8 @@ export type CatalogFilters = {
   min?: string;
   max?: string;
   sort?: string;
+  /** "1" shows only pieces on sale. */
+  sale?: string;
 };
 
 export type StoreSettings = {

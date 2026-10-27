@@ -24,6 +24,7 @@ type VariantRow = {
   color_hex: string;
   stock: number;
   price: number;
+  compare_at_price: number | null;
 };
 
 const sizeOrder = (a: string, b: string) =>
@@ -53,6 +54,7 @@ export function mapProduct(row: Row): Product {
       color: { name: v.color_name, hex: v.color_hex },
       stock: v.stock,
       price: v.price,
+      compareAtPrice: v.compare_at_price,
     }))
     .sort(
       (a, b) =>
@@ -82,7 +84,7 @@ export function mapProduct(row: Row): Product {
 }
 
 export const PRODUCT_SELECT =
-  "*, product_images(color, url, alt, sort), variants(id, sku, size, size_system, color_name, color_hex, stock, price)";
+  "*, product_images(color, url, alt, sort), variants(id, sku, size, size_system, color_name, color_hex, stock, price, compare_at_price)";
 
 async function loadFromSupabase(): Promise<CatalogData> {
   const db = createPublicClient();

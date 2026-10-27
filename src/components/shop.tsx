@@ -31,6 +31,8 @@ export function Shop() {
   } = useCatalog();
   const f = Object.fromEntries(params.entries()) as CatalogFilters;
   const category = getCategory(f.category);
+  const isSale = f.sale === "1";
+  const saleCount = getProducts({ sale: "1" }).length;
   const products = getProducts(f);
   const opts = getFilterOptions(f.category);
   const href = (changes: Record<string, string>) => {
@@ -51,7 +53,7 @@ export function Shop() {
   const subName = (slug: string) =>
     category?.subcategories.find((s) => s.slug === slug)?.name ?? slug;
   const active = Object.entries(f).filter(
-    ([k, v]) => v && k !== "category" && k !== "sort",
+    ([k, v]) => v && k !== "category" && k !== "sort" && k !== "sale",
   );
   const filterCount = active.filter(([k]) => k !== "q" && k !== "type").length;
 
@@ -71,19 +73,21 @@ export function Shop() {
             <span aria-current="page">Collection</span>
           )}
         </nav>
-        <h1>{category ? category.name : "All pieces"}</h1>
+        <h1>{isSale ? "Sale" : category ? category.name : "All pieces"}</h1>
         <p>
-          {category
-            ? category.description
-            : `${getProductCount()} pieces in pure leather, made by hand.`}
+          {isSale
+            ? "Selected pieces at reduced prices, while sizes last."
+            : category
+              ? category.description
+              : `${getProductCount()} pieces in pure leather, made by hand.`}
         </p>
       </header>
 
       <nav className="chip-row" aria-label="Categories">
         <Link
           href="/shop"
-          className={!category ? "chip selected" : "chip"}
-          aria-current={!category ? "page" : undefined}
+          className={!category && !isSale ? "chip selected" : "chip"}
+          aria-current={!category && !isSale ? "page" : undefined}
         >
           All
         </Link>
@@ -97,6 +101,15 @@ export function Shop() {
             {c.name}
           </Link>
         ))}
+        {saleCount > 0 && (
+          <Link
+            href="/shop?sale=1"
+            className={isSale ? "chip chip-sale selected" : "chip chip-sale"}
+            aria-current={isSale ? "page" : undefined}
+          >
+            Sale
+          </Link>
+        )}
       </nav>
       {category && (
         <nav className="chip-row sub" aria-label={`${category.name} types`}>

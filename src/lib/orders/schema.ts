@@ -20,7 +20,12 @@ export const checkoutSchema = z.object({
       .trim()
       .min(6, "Enter your full delivery address.")
       .max(400),
-    city: z.string().trim().min(2, "Enter your city.").max(80),
+    city: z
+      .string()
+      .trim()
+      .min(2, "Enter your city.")
+      .max(80)
+      .refine((v) => /[A-Za-z\u0600-\u06FF]/.test(v), "Enter your city name, for example Lahore."),
     postal_code: z.string().trim().max(12).optional(),
     notes: z.string().trim().max(500).optional(),
   }),

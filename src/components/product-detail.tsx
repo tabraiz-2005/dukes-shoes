@@ -9,7 +9,7 @@ import { getImages } from "@/services/catalog";
 import { useCatalog } from "./catalog-provider";
 import { Photo, Modal, Quantity } from "./ui";
 import { useStore } from "./store-provider";
-import { priceLabel } from "./product-card";
+import { PriceLine } from "./product-card";
 
 export function ProductDetail({ product: p }: { product: Product }) {
   const s = useStore();
@@ -106,9 +106,26 @@ export function ProductDetail({ product: p }: { product: Product }) {
           <p className="product-kicker">{sub?.name ?? category?.name}</p>
           <h1>{p.name}</h1>
           <p className="product-style">{p.style}</p>
-          <p className="detail-price">
-            {variant ? money(variant.price) : priceLabel(p)}
-          </p>
+          <div className="detail-price">
+            {variant ? (
+              <p className={(variant.compareAtPrice ?? 0) > variant.price ? "price-line on-sale" : "price-line"}>
+                <span className="price-now">{money(variant.price)}</span>
+                {(variant.compareAtPrice ?? 0) > variant.price && (
+                  <>
+                    <s className="price-was">
+                      <span className="sr-only">Was </span>
+                      {money(variant.compareAtPrice!)}
+                    </s>
+                    <span className="price-off">
+                      −{Math.round((1 - variant.price / variant.compareAtPrice!) * 100)}%
+                    </span>
+                  </>
+                )}
+              </p>
+            ) : (
+              <PriceLine product={p} />
+            )}
+          </div>
 
           <fieldset>
             <legend>

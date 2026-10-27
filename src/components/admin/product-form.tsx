@@ -41,6 +41,7 @@ export type ProductRecord = {
     color_hex: string;
     stock: number;
     price: number;
+    compare_at_price: number | null;
   }[];
 };
 
@@ -61,7 +62,7 @@ const SWATCHES = [
   ["Navy", "#1f2c5c"],
 ];
 
-type Row = { id?: string; sku: string; price: string; stock: string };
+type Row = { id?: string; sku: string; price: string; was: string; stock: string };
 type Img = { id?: string; color: string; url: string; alt: string };
 
 const slugify = (s: string) =>
@@ -138,7 +139,13 @@ export function ProductForm({
     Object.fromEntries(
       (product?.variants ?? []).map((v) => [
         key(v.color_name, v.size),
-        { id: v.id, sku: v.sku, price: String(v.price / 100), stock: String(v.stock) },
+        {
+          id: v.id,
+          sku: v.sku,
+          price: String(v.price / 100),
+          was: v.compare_at_price ? String(v.compare_at_price / 100) : "",
+          stock: String(v.stock),
+        },
       ]),
     ),
   );
@@ -147,6 +154,7 @@ export function ProductForm({
   );
   const [bulkPrice, setBulkPrice] = useState("");
   const [bulkStock, setBulkStock] = useState("");
+  const [bulkWas, setBulkWas] = useState("");
   const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const category = categories.find((c) => c.id === categoryId);
@@ -155,6 +163,7 @@ export function ProductForm({
     rows[key(color, size)] ?? {
       sku: `${skuPrefix}-${color.replace(/[^a-z]/gi, "").slice(0, 3).toUpperCase()}-${size.replace(/\s/g, "").toUpperCase()}`,
       price: "",
+      was: "",
       stock: "0",
     };
   const setRow = (color: string, size: string, patch: Partial<Row>) =>
@@ -225,6 +234,7 @@ export function ProductForm({
           color_hex: c.hex,
           stock: Math.max(0, Math.floor(Number(r.stock) || 0)),
           price: Math.round((Number(r.price) || 0) * 100),
+          compare_at_price: Number(r.was) > 0 ? Math.round(Number(r.was) * 100) : null,
         };
       }),
     );
@@ -374,6 +384,17 @@ export function ProductForm({
                 });
               }}>Apply</button>
               <label>
+                <span>Was price for all, Rs</span>
+                <input inputMode="numeric" value={bulkWas} placeholder="Sale only" onChange={(e) => setBulkWas(e.target.value.replace(/[^\d]/g, ""))} />
+              </label>
+              <button type="button" className="text-link" onClick={() => {
+                setRows((r) => {
+                  const next = { ...r };
+                  for (const c of colors) for (const s of sizes) next[key(c.name, s)] = { ...rowFor(c.name, s), was: bulkWas };
+                  return next;
+                });
+              }}>{bulkWas ? "Apply" : "Clear sale"}</button>
+              <label>
                 <span>Stock for all</span>
                 <input inputMode="numeric" value={bulkStock} onChange={(e) => setBulkStock(e.target.value.replace(/[^\d]/g, ""))} />
               </label>
@@ -416,7 +437,7 @@ export function ProductForm({
                 </div>
                 <table className="admin-table variant-table">
                   <thead>
-                    <tr><th>Size</th><th>Price, Rs</th><th>Stock</th><th>SKU</th></tr>
+                    <tr><th>Size</th><th>Price, Rs</th><th>Was, Rs</th><th>Stock</th><th>SKU</th></tr>
                   </thead>
                   <tbody>
                     {sizes.map((s) => {
@@ -425,6 +446,7 @@ export function ProductForm({
                         <tr key={s}>
                           <td>{s}</td>
                           <td><input inputMode="numeric" value={r.price} aria-label={`Price for ${c.name} ${s}`} onChange={(e) => setRow(c.name, s, { price: e.target.value.replace(/[^\d]/g, "") })} /></td>
+                          <td><input inputMode="numeric" value={r.was} placeholder="—" aria-label={`Was price for ${c.name} ${s}`} onChange={(e) => setRow(c.name, s, { was: e.target.value.replace(/[^\d]/g, "") })} /></td>
                           <td><input inputMode="numeric" value={r.stock} aria-label={`Stock for ${c.name} ${s}`} onChange={(e) => setRow(c.name, s, { stock: e.target.value.replace(/[^\d]/g, "") })} /></td>
                           <td><input value={r.sku} aria-label={`SKU for ${c.name} ${s}`} onChange={(e) => setRow(c.name, s, { sku: e.target.value.toUpperCase() })} /></td>
                         </tr>
