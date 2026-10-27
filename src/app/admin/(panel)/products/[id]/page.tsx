@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAdmin } from "@/lib/admin/auth";
+import { getMemberWith } from "@/lib/admin/auth";
+import { AdminOnly } from "@/components/admin/denied";
 import { getAdminCategories, getAdminProduct } from "@/lib/admin/queries";
 import { ProductForm } from "@/components/admin/product-form";
 
@@ -13,8 +14,8 @@ export default async function EditProduct({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ created?: string }>;
 }) {
-  const admin = await getAdmin();
-  if (!admin?.isAdmin) return null;
+  const admin = await getMemberWith("admin");
+  if (!admin) return <AdminOnly />;
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const [categories, product] = await Promise.all([

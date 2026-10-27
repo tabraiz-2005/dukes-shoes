@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition, type FormEvent } from "react";
-import { placeOrder } from "@/app/(store)/checkout/actions";
+import { checkDiscount, placeOrder } from "@/app/(store)/checkout/actions";
 import { getImages } from "@/services/catalog";
 import { money } from "@/lib/format";
 import { useStore } from "./store-provider";
@@ -66,6 +66,32 @@ export function Checkout() {
   const [error, setError] = useState("");
   const [fields, setFields] = useState<Record<string, string>>({});
   const live = data.source === "supabase";
+  const [code, setCode] = useState("");
+  const [discount, setDiscount] = useState<{ code: string; amount: number } | null>(null);
+  const [codeMsg, setCodeMsg] = useState("");
+  const [checking, startCheck] = useTransition();
+
+  // A discount was calculated for a specific subtotal: drop it if the bag changes.
+  const [discountFor, setDiscountFor] = useState(0);
+  if (discount && discountFor !== s.subtotal) {
+    setDiscount(null);
+    setCodeMsg("Your bag changed. Apply the code again.");
+  }
+
+  function applyCode() {
+    if (!code.trim()) return;
+    startCheck(async () => {
+      const r = await checkDiscount(code, s.subtotal);
+      if (r.valid) {
+        setDiscount({ code: r.code, amount: r.amount });
+        setDiscountFor(s.subtotal);
+        setCodeMsg("");
+      } else {
+        setDiscount(null);
+        setCodeMsg(r.message);
+      }
+    });
+  }
 
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -80,6 +106,7 @@ export function Checkout() {
         city: get("city"),
         postal_code: get("postal_code"),
         notes: get("notes"),
+        discount_code: discount?.code ?? "",
       },
       items: s.cart.map((i) => ({
         variant_id: i.variantId,
@@ -97,6 +124,7 @@ export function Checkout() {
       }
       setError(result.message);
       setFields(result.fields ?? {});
+      if (result.message.includes("discount code")) setDiscount(null);
       if (result.variantId) {
         s.remove(result.variantId);
         router.refresh();
@@ -260,7 +288,50 @@ export function Checkout() {
                 </div>
               );
             })}
-            <Totals />
+            {live && (
+              <div className="discount-box">
+                <label htmlFor="discount-code">Discount code</label>
+                <div>
+                  <input
+                    id="discount-code"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.toUpperCase())}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        applyCode();
+                      }
+                    }}
+                    placeholder="Enter code"
+                    autoComplete="off"
+                    disabled={Boolean(discount)}
+                  />
+                  {discount ? (
+                    <button
+                      type="button"
+                      className="text-link"
+                      onClick={() => {
+                        setDiscount(null);
+                        setCode("");
+                      }}
+                    >
+                      Remove
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="button"
+                      onClick={applyCode}
+                      disabled={checking || !code.trim()}
+                    >
+                      {checking ? "Checking…" : "Apply"}
+                    </button>
+                  )}
+                </div>
+                {codeMsg && <p className="field-error">{codeMsg}</p>}
+              </div>
+            )}
+            <Totals discount={discount} />
           </aside>
         </div>
       )}

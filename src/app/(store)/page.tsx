@@ -5,21 +5,6 @@ import { getCatalogData } from "@/lib/catalog/source";
 import { Photo } from "@/components/ui";
 import { ProductCard } from "@/components/product-card";
 
-const HERO = [
-  {
-    src: "/images/dukes/croc-chain-loafer.jpg",
-    alt: "Black pebble-grain loafers with navy croc-embossed vamps and a gold chain",
-  },
-  {
-    src: "/images/dukes/horsebit-noir.jpg",
-    alt: "Polished black horsebit loafers on red velvet",
-  },
-  {
-    src: "/images/dukes/pebble-loafer.jpg",
-    alt: "Black pebble-grain loafers with cedar shoe trees",
-  },
-];
-
 const SERVICES = [
   {
     icon: Truck,
@@ -39,7 +24,10 @@ const SERVICES = [
 ];
 
 export default async function Home() {
-  const { getProducts, getProductCount } = createCatalog(await getCatalogData());
+  const data = await getCatalogData();
+  const { getProducts, getProductCount } = createCatalog(data);
+  const home = data.content.home;
+  const tiles = data.collections.filter((c) => c.showOnHome && c.image).slice(0, 2);
   const all = getProducts();
   const total = getProductCount();
   const fresh = all.filter((p) => p.isNew).slice(0, 4);
@@ -48,28 +36,32 @@ export default async function Home() {
   return (
     <>
       <section className="hero" aria-labelledby="hero-title">
-        <div className="hero-media">
-          {HERO.map((img, i) => (
-            <div key={img.src} className="hero-frame">
+        <div className="hero-media" data-count={Math.min(home.images.length, 3)}>
+          {home.images.slice(0, 3).map((img, i) => (
+            <div key={img.url + i} className="hero-frame">
               <Photo
-                src={img.src}
+                src={img.url}
                 alt={img.alt}
                 priority={i === 0}
-                sizes="(max-width: 800px) 100vw, 34vw"
+                sizes={`(max-width: 800px) 100vw, ${Math.round(100 / Math.min(home.images.length, 3))}vw`}
               />
             </div>
           ))}
         </div>
         <div className="hero-overlay">
-          <p className="eyebrow">Autumn / Winter 2026</p>
-          <h1 id="hero-title">The Dress Shoe Edit</h1>
+          {home.eyebrow && <p className="eyebrow">{home.eyebrow}</p>}
+          <h1 id="hero-title">{home.title}</h1>
           <div className="hero-links">
-            <Link className="button" href="/shop?category=dress-shoes">
-              Dress shoes
-            </Link>
-            <Link className="button ghost" href="/shop?category=chappal">
-              Chappal
-            </Link>
+            {home.primary.label && (
+              <Link className="button" href={home.primary.href || "/shop"}>
+                {home.primary.label}
+              </Link>
+            )}
+            {home.secondary.label && (
+              <Link className="button ghost" href={home.secondary.href || "/shop"}>
+                {home.secondary.label}
+              </Link>
+            )}
             <Link className="text-link" href="/shop">
               The collection
             </Link>
@@ -118,32 +110,20 @@ export default async function Home() {
         </section>
       )}
 
-      <section className="edits" aria-label="Collections">
-        <Link href="/shop?category=dress-shoes&type=loafers" className="edit-tile">
-          <Photo
-            src="/images/dukes/horsebit-cognac.jpg"
-            alt=""
-            sizes="(max-width: 800px) 100vw, 50vw"
-          />
-          <span className="edit-copy">
-            <span className="edit-title">The loafer edit</span>
-            <span>Horsebit, chain and penny loafers in polished leather.</span>
-            <span className="text-link">Explore</span>
-          </span>
-        </Link>
-        <Link href="/shop?category=dress-shoes&type=derbies" className="edit-tile">
-          <Photo
-            src="/images/dukes/captoe-derby.jpg"
-            alt=""
-            sizes="(max-width: 800px) 100vw, 50vw"
-          />
-          <span className="edit-copy">
-            <span className="edit-title">The cap-toe Derby</span>
-            <span>Perforated toe cap, contrast welt, made to be resoled.</span>
-            <span className="text-link">Explore</span>
-          </span>
-        </Link>
-      </section>
+      {tiles.length > 0 && (
+        <section className={`edits edits-${tiles.length}`} aria-label="Collections">
+          {tiles.map((c) => (
+            <Link key={c.id} href={`/collections/${c.slug}`} className="edit-tile">
+              <Photo src={c.image!} alt="" sizes="(max-width: 800px) 100vw, 50vw" />
+              <span className="edit-copy">
+                <span className="edit-title">{c.title}</span>
+                {c.description && <span>{c.description}</span>}
+                <span className="text-link">Explore</span>
+              </span>
+            </Link>
+          ))}
+        </section>
+      )}
 
       {picks.length > 0 && (
         <section className="section" aria-labelledby="picks-title">

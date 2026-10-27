@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getAdmin } from "@/lib/admin/auth";
+import { getMemberWith } from "@/lib/admin/auth";
 import { money } from "@/lib/format";
 import { STATUS_LABEL, dateTime } from "@/lib/admin/format";
 
@@ -12,8 +12,8 @@ export default async function Orders({
 }: {
   searchParams: Promise<{ status?: string; q?: string }>;
 }) {
-  const admin = await getAdmin();
-  if (!admin?.isAdmin) return null;
+  const admin = await getMemberWith("staff");
+  if (!admin) return null;
   const { status = "all", q = "" } = await searchParams;
   let query = admin.supabase
     .from("orders")

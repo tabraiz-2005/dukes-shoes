@@ -24,14 +24,15 @@ export function Wordmark({ footer = false }: { footer?: boolean }) {
     );
   return (
     <span className="brand-lockup">
-      <Image
-        src="/brand/lion.png"
-        alt=""
-        width={300}
-        height={410}
-        className="brand-lion"
-        priority={!footer}
-      />
+      <span className="brand-lion">
+        <Image
+          src="/brand/lion-gold.png"
+          alt=""
+          width={600}
+          height={820}
+          priority={!footer}
+        />
+      </span>
       <span className="brand-words">
         <span className="brand-name">{store.name}</span>
         <small>{store.tagline}</small>
@@ -45,7 +46,7 @@ export function Header() {
   const path = usePathname();
   const [menu, setMenu] = useState(false),
     [search, setSearch] = useState(false);
-  const { getCategories, getProducts } = useCatalog();
+  const { getCategories, getProducts, data } = useCatalog();
   const categories = getCategories();
   const hasSale = getProducts({ sale: "1" }).length > 0;
   return (
@@ -53,9 +54,11 @@ export function Header() {
       <a className="skip" href="#main">
         Skip to content
       </a>
-      <div className="announcement">
-        <p>{store.announcement}</p>
-      </div>
+      {data.content.store.announcement && (
+        <div className="announcement">
+          <p>{data.content.store.announcement}</p>
+        </div>
+      )}
       <header className="header">
         <div className="header-start">
           <button
@@ -223,7 +226,10 @@ export function Header() {
 }
 
 export function Footer() {
-  const categories = useCatalog().getCategories();
+  const { getCategories, data } = useCatalog();
+  const categories = getCategories();
+  const info = data.content.store;
+  const wa = info.whatsapp.replace(/\D/g, "").replace(/^0/, "92");
   return (
     <footer className="footer">
       <div className="footer-top">
@@ -256,10 +262,22 @@ export function Footer() {
         </div>
         <div>
           <h2>Visit the atelier</h2>
-          <p>{store.contact.address}</p>
-          <p>{store.contact.hours}</p>
-          <p>{store.contact.whatsapp}</p>
-          <p className="approval">{store.approvalLabel}</p>
+          {info.address && <p>{info.address}</p>}
+          {info.hours && <p>{info.hours}</p>}
+          {info.whatsapp && (
+            <a href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer">
+              WhatsApp {info.whatsapp}
+            </a>
+          )}
+          {info.email && <a href={`mailto:${info.email}`}>{info.email}</a>}
+          {info.instagram && (
+            <a href={info.instagram} target="_blank" rel="noreferrer">
+              Instagram
+            </a>
+          )}
+          {!info.address && !info.whatsapp && (
+            <p className="approval">Add your address and WhatsApp in Admin, Store settings.</p>
+          )}
         </div>
       </div>
       <div className="footer-bottom">

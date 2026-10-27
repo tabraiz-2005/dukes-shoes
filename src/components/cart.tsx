@@ -22,17 +22,28 @@ export function Empty({ title, text }: { title: string; text: string }) {
 }
 
 /** Subtotal, delivery and total lines shared by the bag and checkout. */
-export function Totals() {
+export function Totals({
+  discount,
+}: {
+  discount?: { code: string; amount: number } | null;
+}) {
   const s = useStore();
   const { data } = useCatalog();
   const shipping = shippingFor(data, s.subtotal);
   const remaining = data.settings.freeShippingThreshold - s.subtotal;
+  const off = Math.min(discount?.amount ?? 0, s.subtotal);
   return (
     <>
       <div className="summary-line">
         <span>Subtotal</span>
         <strong>{money(s.subtotal)}</strong>
       </div>
+      {off > 0 && (
+        <div className="summary-line minor discount-line">
+          <span>Discount ({discount!.code})</span>
+          <span>−{money(off)}</span>
+        </div>
+      )}
       <div className="summary-line minor">
         <span>Delivery</span>
         <span>{shipping ? money(shipping) : "Free"}</span>
@@ -44,7 +55,7 @@ export function Totals() {
       )}
       <div className="summary-line total">
         <span>Total</span>
-        <strong>{money(s.subtotal + shipping)}</strong>
+        <strong>{money(s.subtotal - off + shipping)}</strong>
       </div>
     </>
   );

@@ -28,7 +28,7 @@ export function SettingsForm({ shippingFee, threshold }: { shippingFee: number; 
         <span>Free delivery on orders from, Rs</span>
         <input inputMode="numeric" value={free} onChange={(e) => setFree(e.target.value.replace(/[^\d]/g, ""))} />
       </label>
-      <p className="muted">Applied at checkout. Remember to update the announcement text in src/config/store.ts to match.</p>
+      <p className="muted">Applied at checkout. Update the announcement bar below to match.</p>
       {msg && <p className={msg.ok ? "form-ok" : "form-error"} role="status">{msg.text}</p>}
       <button className="button" disabled={pending}>{pending ? "Saving…" : "Save settings"}</button>
     </form>

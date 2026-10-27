@@ -19,6 +19,8 @@ type Summary = {
   customer_name: string;
   city: string;
   subtotal: number;
+  discount?: number;
+  discount_code?: string | null;
   shipping: number;
   total: number;
   items: {
@@ -78,6 +80,12 @@ export default async function OrderPage({
           <span>Subtotal</span>
           <span>{money(order.subtotal)}</span>
         </div>
+        {(order.discount ?? 0) > 0 && (
+          <div className="summary-line minor discount-line">
+            <span>Discount ({order.discount_code})</span>
+            <span>−{money(order.discount!)}</span>
+          </div>
+        )}
         <div className="summary-line minor">
           <span>Delivery</span>
           <span>{order.shipping ? money(order.shipping) : "Free"}</span>

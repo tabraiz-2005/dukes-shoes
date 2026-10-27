@@ -24,6 +24,7 @@ const MESSAGES: Record<string, string> = {
   TOO_MANY_ITEMS: "Too many different items in one order. Split it into two orders.",
   INVALID_QUANTITY: "Each item can be ordered up to 10 at a time.",
   INVALID_ITEM: "Something in your bag is no longer valid. Remove it and try again.",
+  INVALID_DISCOUNT: "That discount code can no longer be used. Remove it and place the order again.",
 };
 
 export async function placeOrder(input: unknown): Promise<CheckoutResult> {
@@ -47,7 +48,11 @@ export async function placeOrder(input: unknown): Promise<CheckoutResult> {
   const { data, error } = await createPublicClient({ cached: false }).rpc(
     "place_order",
     {
-      customer: { ...customer, email: customer.email || null },
+      customer: {
+        ...customer,
+        email: customer.email || null,
+        discount_code: customer.discount_code || null,
+      },
       items,
     },
   );
@@ -73,4 +78,30 @@ export async function placeOrder(input: unknown): Promise<CheckoutResult> {
   // Stock changed: refresh cached catalogue pages.
   updateTag(CATALOG_TAG);
   return { ok: true, orderId: row.order_id, orderNumber: row.order_number };
+}
+
+export type DiscountCheck =
+  | { valid: true; code: string; amount: number }
+  | { valid: false; message: string };
+
+/** Checks a discount code against the current subtotal (minor units). */
+export async function checkDiscount(code: string, subtotal: number): Promise<DiscountCheck> {
+  if (!isSupabaseConfigured())
+    return { valid: false, message: "Discount codes work once the store is connected." };
+  const clean = String(code ?? "").trim().toUpperCase().slice(0, 30);
+  if (!/^[A-Z0-9_-]{3,30}$/.test(clean)) return { valid: false, message: "Enter a valid code." };
+  const { data, error } = await createPublicClient({ cached: false }).rpc("check_discount", {
+    p_code: clean,
+    p_subtotal: Math.max(0, Math.floor(subtotal)),
+  });
+  if (error || !data) return { valid: false, message: "We could not check that code. Try again." };
+  if (!data.valid) {
+    if (data.reason === "min")
+      return {
+        valid: false,
+        message: `This code needs an order of Rs ${(data.min_subtotal / 100).toLocaleString("en-PK")} or more.`,
+      };
+    return { valid: false, message: "This code is not valid." };
+  }
+  return { valid: true, code: data.code, amount: data.amount };
 }

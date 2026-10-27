@@ -28,6 +28,7 @@ export const checkoutSchema = z.object({
       .refine((v) => /[A-Za-z\u0600-\u06FF]/.test(v), "Enter your city name, for example Lahore."),
     postal_code: z.string().trim().max(12).optional(),
     notes: z.string().trim().max(500).optional(),
+    discount_code: z.string().trim().max(30).optional(),
   }),
   items: z
     .array(

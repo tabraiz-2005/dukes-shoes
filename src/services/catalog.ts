@@ -65,6 +65,13 @@ export function createCatalog(data: CatalogData) {
         .slice(0, 4);
     },
     getVariant: (id: string) => variantIndex.get(id),
+    getCollection: (slug: string) => data.collections.find((c) => c.slug === slug),
+    getCollectionProducts(slug: string) {
+      const c = data.collections.find((x) => x.slug === slug);
+      if (!c) return [];
+      const byId = new Map(products.map((p) => [p.id, p]));
+      return c.productIds.map((id) => byId.get(id)).filter((p): p is Product => Boolean(p));
+    },
     getFilterOptions(category?: string) {
       const scope = category
         ? products.filter((p) => p.categoryId === category)

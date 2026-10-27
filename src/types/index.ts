@@ -82,6 +82,8 @@ export type CatalogData = {
   categories: Category[];
   products: Product[];
   settings: StoreSettings;
+  content: { home: HomeContent; store: StoreContent };
+  collections: Collection[];
   /** "supabase" when live, "demo" when no database is configured. */
   source: "supabase" | "demo";
 };
@@ -92,3 +94,34 @@ export type OrderStatus =
   | "shipped"
   | "delivered"
   | "cancelled";
+
+export type LinkButton = { label: string; href: string };
+
+/** Homepage hero, edited in Admin > Homepage. */
+export type HomeContent = {
+  eyebrow: string;
+  title: string;
+  images: { url: string; alt: string }[];
+  primary: LinkButton;
+  secondary: LinkButton;
+};
+
+/** Announcement bar and contact details, edited in Admin > Store settings. */
+export type StoreContent = {
+  announcement: string;
+  address: string;
+  hours: string;
+  whatsapp: string;
+  email: string;
+  instagram: string;
+};
+
+export type Collection = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  image: string | null;
+  showOnHome: boolean;
+  productIds: string[];
+};

@@ -8,6 +8,7 @@ import { deleteProduct, saveProduct } from "@/app/admin/actions";
 import { getBrowserClient } from "@/lib/supabase/browser";
 import { PRODUCT_IMAGE_BUCKET } from "@/lib/supabase/env";
 import type { SizeSystem } from "@/types";
+import { prepare } from "@/lib/admin/upload";
 
 export type AdminCategory = {
   id: string;
@@ -68,23 +69,6 @@ type Img = { id?: string; color: string; url: string; alt: string };
 const slugify = (s: string) =>
   s.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 const key = (color: string, size: string) => `${color}|${size}`;
-
-/** Downscale large photos in the browser before upload (max 2000px, JPEG). */
-async function prepare(file: File): Promise<Blob> {
-  if (!file.type.startsWith("image/") || file.type === "image/svg+xml") return file;
-  try {
-    const bitmap = await createImageBitmap(file);
-    const scale = Math.min(1, 2000 / Math.max(bitmap.width, bitmap.height));
-    if (scale === 1 && file.size < 1_500_000) return file;
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.round(bitmap.width * scale);
-    canvas.height = Math.round(bitmap.height * scale);
-    canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    return await new Promise((res) => canvas.toBlob((b) => res(b ?? file), "image/jpeg", 0.86));
-  } catch {
-    return file;
-  }
-}
 
 export function ProductForm({
   categories,

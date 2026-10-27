@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { categories as demoCategories, products as demoProducts } from "@/data/catalog";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { demoCollections, mergeHome, mergeStore } from "@/config/content";
 import { createPublicClient } from "@/lib/supabase/public";
 import type {
   CatalogData,
@@ -88,7 +89,7 @@ export const PRODUCT_SELECT =
 
 async function loadFromSupabase(): Promise<CatalogData> {
   const db = createPublicClient();
-  const [cats, prods, settings] = await Promise.all([
+  const [cats, prods, settings, content, cols] = await Promise.all([
     db
       .from("categories")
       .select("id, slug, name, description, image, sort, subcategories(slug, name, sort)")
@@ -99,7 +100,16 @@ async function loadFromSupabase(): Promise<CatalogData> {
       .eq("status", "active")
       .order("created_at", { ascending: false }),
     db.from("store_settings").select("shipping_fee, free_shipping_threshold").maybeSingle(),
+    db.from("site_content").select("key, value"),
+    db
+      .from("collections")
+      .select("id, slug, title, description, image, show_on_home, sort, collection_products(product_id, sort)")
+      .eq("status", "active")
+      .order("sort"),
   ]);
+  // Older databases (before migration 0003) have no content tables: fall back to defaults.
+  const contentRows = (content.error ? [] : content.data ?? []) as { key: string; value: Record<string, unknown> }[];
+  const byKey = Object.fromEntries(contentRows.map((r) => [r.key, r.value]));
   if (cats.error) throw new Error(`Catalogue: ${cats.error.message}`);
   if (prods.error) throw new Error(`Catalogue: ${prods.error.message}`);
 
@@ -127,6 +137,20 @@ async function loadFromSupabase(): Promise<CatalogData> {
           freeShippingThreshold: settings.data.free_shipping_threshold,
         }
       : DEMO_SETTINGS,
+    content: { home: mergeHome(byKey.home), store: mergeStore(byKey.store) },
+    collections: cols.error
+      ? demoCollections
+      : (cols.data ?? []).map((c) => ({
+          id: c.id,
+          slug: c.slug,
+          title: c.title,
+          description: c.description ?? "",
+          image: c.image,
+          showOnHome: c.show_on_home,
+          productIds: ((c.collection_products as { product_id: string; sort: number }[]) ?? [])
+            .toSorted((a, b) => a.sort - b.sort)
+            .map((x) => x.product_id),
+        })),
     source: "supabase",
   };
 }
@@ -138,6 +162,17 @@ export const getCatalogData = cache(async (): Promise<CatalogData> => {
     categories: demoCategories,
     products: demoProducts,
     settings: DEMO_SETTINGS,
+    content: { home: mergeHome(null), store: mergeStore(null) },
+    collections: demoCollections.map((c) => ({
+      ...c,
+      productIds: demoProducts
+        .filter((p) =>
+          c.slug === "the-loafer-edit"
+            ? p.subcategory === "loafers"
+            : ["derbies", "oxfords"].includes(p.subcategory),
+        )
+        .map((p) => p.id),
+    })),
     source: "demo",
   };
 });

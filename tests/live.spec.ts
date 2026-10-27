@@ -63,7 +63,7 @@ test("admin creates a product that appears in the store", async ({ page }) => {
   await page.getByLabel("Password").fill(ADMIN_PASSWORD);
   await page.getByRole("button", { name: "Sign in" }).click();
   await page.getByRole("link", { name: "Products", exact: true }).click();
-  await page.getByRole("link", { name: "New product" }).click();
+  await page.getByRole("link", { name: "Add product" }).click();
   await page.getByLabel("Product name").fill("Test Monk Strap");
   await page.getByLabel("Style line").fill("Double monk strap");
   await page.getByLabel("Category").selectOption("dress-shoes");

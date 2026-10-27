@@ -15,7 +15,8 @@ Schema, row-level security, photo bucket, `place_order` (locks stock, recalculat
 - [ ] Customer SMS/email confirmation
 - [ ] Online payments: JazzCash / Easypaisa / card gateway (needs merchant account)
 - [ ] Courier integration (TCS, Leopards, PostEx) and tracking numbers
-- [ ] Discount codes and sale prices
+- [x] Discount codes and sale prices
+- [x] Team roles (owner, admin, staff), inventory, categories, collections, homepage and store details editable in admin
 
 ## 5. Launch — next
 - [ ] Deploy to Vercel and connect the domain (README steps 5 and 6)

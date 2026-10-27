@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { getAdmin } from "@/lib/admin/auth";
+import { getMemberWith } from "@/lib/admin/auth";
 import { money } from "@/lib/format";
 import { STATUS_LABEL, dateTime, daysAgoIso } from "@/lib/admin/format";
 
 export default async function Dashboard() {
-  const admin = await getAdmin();
-  if (!admin?.isAdmin) return null;
+  const admin = await getMemberWith("staff");
+  if (!admin) return null;
   const db = admin.supabase;
   const since = daysAgoIso(30);
   const [recent, month, pending, lowStock, products] = await Promise.all([

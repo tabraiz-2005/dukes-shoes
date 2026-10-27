@@ -29,6 +29,7 @@ Open http://localhost:3000. Needs Node.js 20.9 or newer.
 2. Open **SQL Editor → New query**, paste the whole of `supabase/migrations/0001_init.sql`, and select **Run**. This creates the tables, security rules, order functions and the `product-images` photo bucket.
 3. New query again: paste `supabase/seed.sql` and **Run**. This loads the 5 categories and the 20 starting products (edit, replace or archive them later in the admin).
 4. New query again: paste `supabase/migrations/0002_sale_prices.sql` and **Run**. This adds sale ("was") prices.
+5. New query again: paste `supabase/migrations/0003_admin_upgrade.sql` and **Run**. This adds team roles, the homepage editor, collections and discount codes.
 
 All three files are safe to run twice. Future updates will add more numbered files in `supabase/migrations/`; run each new one once, in order.
 
@@ -83,6 +84,22 @@ git push -u origin main
 - **Orders**: Admin → Orders. Call the customer, then **Mark as confirmed → shipped → delivered**. **Cancel order** returns the stock.
 - **Delivery charges**: Admin → Settings. Also update the announcement text in `src/config/store.ts`.
 - **Hide a product**: set it to Draft or Archived. Deleting keeps past orders intact.
+
+## Admin sections
+
+| Section | Who | What it does |
+| --- | --- | --- |
+| Dashboard, Orders | Staff and up | New orders (badge shows how many are pending), confirm, ship, cancel |
+| Inventory | Staff and up | Every size and colour; type a number, press Enter, it saves |
+| Products | Admin and up | Tabs Current / Live / Drafts / Archived / All, search by name or SKU, filter by category |
+| Categories | Admin and up | Name, photo, menu order and the groups inside (Oxfords, Loafers…) |
+| Collections | Admin and up | Hand-picked edits; the first two marked "homepage" become the big tiles |
+| Discounts | Admin and up | Codes for checkout: % or Rs off, minimum order, dates, usage limit |
+| Homepage | Admin and up | Up to 3 hero photos, headline and the two buttons |
+| Store settings | Admin and up | Delivery charges, announcement bar, address, hours, WhatsApp, email, Instagram |
+| Team | Owner manages | Add people by email as Staff, Admin or Owner |
+
+The first admin account becomes the **Owner** when you run migration 0003. To add someone: create their login in Supabase (Authentication → Users → Add user, tick Auto confirm), then add their email in Admin → Team.
 
 ## Themes
 

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAdmin } from "@/lib/admin/auth";
+import { getMemberWith } from "@/lib/admin/auth";
 import { money } from "@/lib/format";
 import { STATUS_LABEL, dateTime } from "@/lib/admin/format";
 import { OrderStatusForm } from "@/components/admin/order-status";
@@ -10,8 +10,8 @@ import { Photo } from "@/components/ui";
 export const metadata: Metadata = { title: "Order" };
 
 export default async function OrderDetail({ params }: { params: Promise<{ id: string }> }) {
-  const admin = await getAdmin();
-  if (!admin?.isAdmin) return null;
+  const admin = await getMemberWith("staff");
+  if (!admin) return null;
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const { data: o } = await admin.supabase.from("orders").select("*, order_items(*)").eq("id", id).maybeSingle();
@@ -48,6 +48,9 @@ export default async function OrderDetail({ params }: { params: Promise<{ id: st
             </div>
           ))}
           <div className="summary-line"><span>Subtotal</span><span>{money(o.subtotal)}</span></div>
+          {o.discount > 0 && (
+            <div className="summary-line minor discount-line"><span>Discount ({o.discount_code})</span><span>−{money(o.discount)}</span></div>
+          )}
           <div className="summary-line minor"><span>Delivery</span><span>{o.shipping ? money(o.shipping) : "Free"}</span></div>
           <div className="summary-line total"><span>Collect on delivery</span><strong>{money(o.total)}</strong></div>
         </section>

@@ -15,12 +15,13 @@
   --muted: #9b978f;
   --line: #232323;
   --line-strong: #3a3a3a;
-  --gold: #d4a645;
-  --gold-light: #f2d27b; /* gold used for text on the background */
-  --gold-deep: #a67a22;
-  --gold-grad: linear-gradient(180deg, #f7dc87 0%, #d4a645 50%, #a67a22 100%);
-  --brand-grad: linear-gradient(180deg, #f7dc87 0%, #dd9a2b 55%, #a96422 100%);
-  --on-gold: #0d0904;
+  /* Metallic gold, sampled from a gold turntable: bronze shadow, warm gold, champagne, highlight */
+  --gold: #c9a24f;
+  --gold-light: #e2c58a; /* champagne gold for text on black */
+  --gold-deep: #8a5a1c;
+  --gold-grad: linear-gradient(180deg, #f6e3a8 0%, #e2bf6f 18%, #c9922f 50%, #a06a22 78%, #c79a4a 100%);
+  --brand-grad: linear-gradient(100deg, #7a4c16 0%, #c08a2c 14%, #ecd08a 30%, #fff4d2 38%, #d8a84a 48%, #94621e 62%, #e2bf72 80%, #f6e6b8 88%, #a9762a 100%);
+  --on-gold: #1b1206;
   --sale: #ff4d5e;
   --danger: #ff6b7d;
   --header-bg: rgb(0 0 0 / 0.88);
@@ -36,10 +37,10 @@
   --muted: #66625b;
   --line: #e6e2da;
   --line-strong: #c9c2b6;
-  --gold: #c9962f;
-  --gold-light: #8a6516;
-  --gold-deep: #7a5a14;
-  --brand-grad: linear-gradient(180deg, #d9a93f 0%, #a67a22 60%, #7a5a14 100%);
+  --gold: #b8892f;
+  --gold-light: #8a5a1c; /* deep gold for text on white */
+  --gold-deep: #6b4414;
+  --brand-grad: linear-gradient(100deg, #5e3910 0%, #a8721f 16%, #d8b05e 32%, #f0d796 40%, #b98428 52%, #7a4c16 66%, #c99a48 82%, #8a5a1c 100%);
   --sale: #c8102e;
   --danger: #c8102e;
   --header-bg: rgb(255 255 255 / 0.92);
@@ -295,7 +296,7 @@ img {
 /* ---------- Announcement and header ---------- */
 .announcement {
   background: #000;
-  color: #f2d27b;
+  color: #e2c58a;
   border-bottom: 1px solid #1d1d1d;
   text-align: center;
   padding: 9px var(--gutter);
@@ -333,7 +334,14 @@ img {
   gap: 10px;
 }
 .brand-lion {
-  width: 30px;
+  position: relative;
+  display: block;
+  width: 32px;
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.45));
+}
+.brand-lion img {
+  display: block;
+  width: 100%;
   height: auto;
 }
 .brand-words {
@@ -348,9 +356,12 @@ img {
   font-size: 26px;
   letter-spacing: 0.06em;
   background: var(--brand-grad);
+  background-size: 220% 100%;
+  background-position: 0% 50%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.35));
 }
 .brand-words small {
   white-space: nowrap;
@@ -555,7 +566,7 @@ img {
   padding: 0 var(--gutter) clamp(36px, 6vw, 72px);
 }
 .hero .eyebrow {
-  color: #f2d27b;
+  color: #e2c58a;
   font-size: 14px;
 }
 .hero h1 {
@@ -688,7 +699,7 @@ img {
   backdrop-filter: blur(4px);
 }
 .save.saved {
-  color: #f2d27b;
+  color: #e2c58a;
 }
 .card-info {
   padding-top: 12px;
@@ -798,7 +809,7 @@ img {
   line-height: 1;
 }
 .edit-copy .text-link {
-  color: #f2d27b;
+  color: #e2c58a;
 }
 
 /* ---------- Services ---------- */
@@ -1551,8 +1562,8 @@ img {
   --text: #f5f3ef;
   --muted: #9b978f;
   --line: #232323;
-  --gold-light: #f2d27b;
-  --brand-grad: linear-gradient(180deg, #f7dc87 0%, #dd9a2b 55%, #a96422 100%);
+  --gold-light: #e2c58a;
+  --brand-grad: linear-gradient(100deg, #7a4c16 0%, #c08a2c 14%, #ecd08a 30%, #fff4d2 38%, #d8a84a 48%, #94621e 62%, #e2bf72 80%, #f6e6b8 88%, #a9762a 100%);
   background: #000;
   color: var(--text);
   border-top: 1px solid #a67a22;
@@ -1947,5 +1958,133 @@ img {
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ==================================================================
+   Metallic gold finish: polished lion and wordmark with a light sweep,
+   brushed-gold buttons with an edge highlight.
+   ================================================================== */
+.brand-lion::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  -webkit-mask: url("/brand/lion-gold.png") center / contain no-repeat;
+  mask: url("/brand/lion-gold.png") center / contain no-repeat;
+  background: linear-gradient(115deg, transparent 35%, rgb(255 250 230 / 0.85) 50%, transparent 65%) 0 0 / 300% 100% no-repeat;
+  background-position: 120% 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .brand-name {
+    animation: gold-shimmer 7s ease-in-out infinite;
+  }
+  .brand-lion::after {
+    animation: lion-sheen 7s ease-in-out infinite;
+  }
+  .wordmark:hover .brand-name,
+  .footer-logo:hover .brand-name {
+    animation-duration: 2.2s;
+  }
+}
+@keyframes gold-shimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+@keyframes lion-sheen {
+  0%,
+  55% {
+    background-position: 120% 0;
+  }
+  80%,
+  100% {
+    background-position: -20% 0;
+  }
+}
+.button,
+.bag-count {
+  background: var(--gold-grad);
+  color: var(--on-gold);
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 226 / 0.75),
+    inset 0 -1px 0 rgb(70 40 10 / 0.45),
+    0 8px 24px -12px rgb(201 146 47 / 0.6);
+  text-shadow: 0 1px 0 rgb(255 240 200 / 0.35);
+}
+.button {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(115deg, transparent 30%, rgb(255 252 236 / 0.55) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 0.7s var(--ease);
+}
+.button:hover:not(:disabled)::after {
+  transform: translateX(120%);
+}
+.button:hover:not(:disabled) {
+  filter: brightness(1.04) saturate(1.05);
+}
+.button:disabled,
+.button.danger,
+.button.ghost,
+.outline-button {
+  box-shadow: none;
+  text-shadow: none;
+}
+.button.ghost {
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.7);
+}
+.outline-button {
+  box-shadow: inset 0 0 0 1px var(--text);
+}
+.button:disabled::after,
+.outline-button::after,
+.button.ghost::after {
+  display: none;
+}
+.hero .eyebrow,
+.edit-copy .text-link {
+  color: #e2c58a;
+}
+.footer {
+  border-top: 1px solid transparent;
+  border-image: linear-gradient(90deg, transparent, #8a5a1c 15%, #e2c58a 50%, #8a5a1c 85%, transparent) 1;
+}
+.services svg {
+  color: var(--gold);
+}
+
+/* Hero with one or two images, and a single collection tile */
+.hero-media[data-count="1"] {
+  grid-template-columns: 1fr;
+}
+.hero-media[data-count="2"] {
+  grid-template-columns: 1fr 1fr;
+}
+.edits-1 {
+  grid-template-columns: 1fr;
+}
+.edits-1 .edit-tile {
+  aspect-ratio: 16/7;
+}
+@media (max-width: 800px) {
+  .hero-media[data-count] {
+    grid-template-columns: 1fr;
+  }
+  .edits-1 .edit-tile {
+    aspect-ratio: 4/5;
   }
 }
