@@ -50,7 +50,7 @@ export function HomeForm({ initial }: { initial: HomeContent }) {
       <section className="panel">
         <h2>Hero images</h2>
         <p className="muted">
-          One to three photos, shown side by side on large screens. Portrait photos (4:5) look best. The first photo is shown on phones.
+          One to three photos, shown side by side on large screens. With one photo, use a wide banner (about 2:1) with empty space on the left for the headline. With two or three, portrait photos (4:5) look best. The first photo is shown on phones.
         </p>
         <div className="hero-slots">
           {[0, 1, 2].map((i) =>

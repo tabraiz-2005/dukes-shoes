@@ -2088,3 +2088,79 @@ img {
     aspect-ratio: 4/5;
   }
 }
+
+/* ---------- Hero refinements: smaller gold headline, wide single banner ---------- */
+.hero h1 {
+  font-size: clamp(36px, 4.4vw, 72px);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  max-width: 14ch;
+  margin-bottom: 26px;
+  background: linear-gradient(100deg, #b98a3c 0%, #e9cd8a 22%, #fff1cc 34%, #d9ad55 50%, #a8772b 68%, #e6c47c 86%, #c79a4a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 14px rgb(0 0 0 / 0.55));
+}
+.hero .eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.32em;
+  margin-bottom: 16px;
+}
+.hero .text-link {
+  color: #e8dcc4;
+}
+/* One wide photo: show it whole, put the words in the dark space on the left */
+.hero:has(.hero-media[data-count="1"]) {
+  height: auto;
+  aspect-ratio: 2 / 1;
+  min-height: 460px;
+  max-height: 860px;
+}
+.hero-media[data-count="1"] .hero-frame img {
+  object-position: 70% center;
+}
+.hero:has(.hero-media[data-count="1"])::after {
+  background:
+    linear-gradient(90deg, rgb(0 0 0 / 0.6) 0%, rgb(0 0 0 / 0.25) 38%, rgb(0 0 0 / 0) 60%),
+    linear-gradient(to top, rgb(0 0 0 / 0.5) 0%, rgb(0 0 0 / 0) 35%);
+}
+.hero:has(.hero-media[data-count="1"]) .hero-overlay {
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-bottom: 0;
+}
+.hero:has(.hero-media[data-count="1"]) .hero-overlay > * {
+  max-width: 46%;
+}
+@media (max-width: 800px) {
+  .hero h1 {
+    font-size: clamp(34px, 10vw, 48px);
+  }
+  .hero:has(.hero-media[data-count="1"]) {
+    aspect-ratio: auto;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+  }
+  .hero-media[data-count="1"] {
+    position: relative;
+    aspect-ratio: 4 / 3;
+  }
+  .hero-media[data-count="1"] .hero-frame img {
+    object-position: 76% center;
+  }
+  .hero:has(.hero-media[data-count="1"])::after {
+    background: linear-gradient(to top, #000 0%, rgb(0 0 0 / 0) 30%);
+  }
+  .hero:has(.hero-media[data-count="1"]) .hero-overlay {
+    position: relative;
+    top: auto;
+    padding: 4px var(--gutter) 40px;
+  }
+  .hero:has(.hero-media[data-count="1"]) .hero-overlay > * {
+    max-width: none;
+  }
+}

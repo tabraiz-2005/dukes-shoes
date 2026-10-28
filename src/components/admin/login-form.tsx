@@ -33,7 +33,7 @@ export function LoginForm() {
 
   return (
     <form className="login-card" onSubmit={submit}>
-      <Image src="/brand/lion.png" alt="" width={300} height={410} className="login-lion" priority />
+      <Image src="/brand/lion-gold.png" alt="" width={600} height={820} className="login-lion" priority />
       <h1>DUKES admin</h1>
       <label className="field">
         <span>Email</span>

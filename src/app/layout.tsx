@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   },
   description:
     "Handmade designer dress shoes, sandals, chappal, belts and wallets in pure leather. Delivery across Pakistan with cash on delivery.",
-  icons: { icon: "/brand/lion.png" },
+  icons: { icon: "/brand/lion-gold.png" },
 };
 
 export const viewport: Viewport = { themeColor: "#000000" };
